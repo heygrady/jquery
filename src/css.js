@@ -275,15 +275,6 @@ function positionPercentHack(elem, name, value) {
 	return parseFloat( value ) / 100 * parent[ "inner" + ( rvpos.test( name ) ? "Height" : "Width" ) ]() + "px";
 }
 
-// used to convert units on any element
-jQuery.toPx = function( elem, value, name ) {
-	name = name || "width";
-	// TODO: pre-calculate absolute unit conversions
-	// TODO: IE<9 won't benefit from the positionPercentHack
-	return awesomeHack( elem, name, value );
-};
-
-
 function getWidthOrHeight( elem, name, extra ) {
 
 	// Start with offset property
