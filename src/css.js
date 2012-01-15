@@ -202,7 +202,7 @@ if ( document.defaultView && document.defaultView.getComputedStyle ) {
 	};
 	
 	// Tribute to: http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
-	awesomeHack = function ( elem, name, value ) {
+	awesomeHack = function( elem, name, value ) {
 		var ret,
 			style = elem.style,
 			uncomputed = style[ name ];
@@ -240,7 +240,7 @@ if ( document.documentElement.currentStyle ) {
 
 	// Faster than: http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
 	// http://jsperf.com/testing-awesome-hack-for-ie
-	awesomeHack = function ( elem, name, value ) {
+	awesomeHack = function( elem, name, value ) {
 		var ret,
 			style = elem.style,
 			left = style.left;
