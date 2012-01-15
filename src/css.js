@@ -172,9 +172,8 @@ jQuery.curCSS = jQuery.css;
 if ( document.defaultView && document.defaultView.getComputedStyle ) {
 	getComputedStyle = function( elem, name, extra, force ) {
 		extra = extra || name;
-		var ret,
-			doc = elem.ownerDocument,
-			defaultView, computedStyle;
+		var ret, defaultView, computedStyle,
+			doc = elem.ownerDocument;
 
 		name = name.replace( rupper, "-$1" ).toLowerCase();
 
