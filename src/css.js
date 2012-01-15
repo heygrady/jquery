@@ -68,18 +68,18 @@ jQuery.extend({
 
 	// Get and set the style property on a DOM Node
 	style: function( elem, name, value, extra ) {
-		// Don"t set styles on text and comment nodes
+		// Don't set styles on text and comment nodes
 		if ( !elem || elem.nodeType === 3 || elem.nodeType === 8 || !elem.style ) {
 			return;
 		}
 
-		// Make sure that we"re working with the right name
+		// Make sure that we're working with the right name
 		var ret, type, origName = jQuery.camelCase( name ),
 			style = elem.style, hooks = jQuery.cssHooks[ origName ];
 
 		name = jQuery.cssProps[ origName ] || origName;
 
-		// Check if we"re setting a value
+		// Check if we're setting a value
 		if ( value !== undefined ) {
 			type = typeof value;
 
@@ -90,7 +90,7 @@ jQuery.extend({
 				type = "number";
 			}
 
-			// Make sure that NaN and null values aren"t set. See: #7116
+			// Make sure that NaN and null values aren't set. See: #7116
 			if ( value == null || type === "number" && isNaN( value ) ) {
 				return;
 			}
@@ -123,7 +123,7 @@ jQuery.extend({
 	css: function( elem, name, extra ) {
 		var ret, hooks;
 
-		// Make sure that we"re working with the right name
+		// Make sure that we're working with the right name
 		name = jQuery.camelCase( name );
 		hooks = jQuery.cssHooks[ name ];
 		name = jQuery.cssProps[ name ] || name;
