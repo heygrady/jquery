@@ -260,7 +260,7 @@ if ( document.documentElement.currentStyle ) {
 curCSS = getComputedStyle || currentStyle;
 
 // calculate percentages for position properties
-function positionPercentHack(elem, name, value) {
+function positionPercentHack( elem, name, value ) {
 	// Left and right require measuring the innerWidth of the *offset* parent.
 	// Top and bottom require measuring the innerHeight of the *offset* parent.
 	var parent = jQuery( elem ).offsetParent(),
