@@ -263,12 +263,12 @@ curCSS = getComputedStyle || currentStyle;
 function positionPercentHack(elem, name, value) {
 	// Left and right require measuring the innerWidth of the *offset* parent.
 	// Top and bottom require measuring the innerHeight of the *offset* parent.
-	var parent = $( elem ).offsetParent(),
+	var parent = jQuery( elem ).offsetParent(),
 		doc = elem.ownerDocument; // document
 
 	// When the offset parent is the body, we need to measure the window
 	if ( parent[ 0 ] === doc.body ) {
-		parent = $( doc.defaultView || doc.parentWindow );
+		parent = jQuery( doc.defaultView || doc.parentWindow );
 	}
 
 	// use simple math to calculate
