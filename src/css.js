@@ -250,10 +250,8 @@ if ( document.documentElement.currentStyle ) {
 			ret = style.pixelLeft + "px";
 		} catch(e) { ret = ""; }
 
-		return ret === "" ? "auto" : ret;
 		style.left = left;
-
-		return ret;
+		return ret === "" ? "auto" : ret;
 	};
 }
 
