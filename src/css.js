@@ -198,6 +198,15 @@ if ( document.defaultView && document.defaultView.getComputedStyle ) {
 			}
 		}
 
+		// IE9
+		//	- Percentages returned on inline static|relative elements
+		//		- top, left, margin, padding, textIndent
+		//	- Percentage returned for textIndent always
+		//	- left|top return pixels instead of auto if position is static
+		// Firefox
+		//	- left|top return percentages if position is static
+		//	- left|top return pixels instead of auto if position is static
+
 		return ret;
 	};
 	
@@ -223,6 +232,12 @@ if ( document.documentElement.currentStyle ) {
 		// if pixel worked, then we need to add a "px" unit
 		ret = pixel ? ret + "px" : ret;
 		
+		// IE8/7/6
+		//	- left|top return pixels instead of auto if position is static
+		//	- position absolute|fixed elements return zero for percentages when height is not defined
+		//		- top, margin, padding, height, textIndent
+		//		- incorrect width
+
 		// In IE, the pixelTop|Bottom|Left|Right is unreliable when the exact parent is not positioned
 		if ( rpos.test( name ) && !pixel && rnumperc.test( ret ) ) {
 			ret = positionPercentHack( elem, name, ret );
@@ -230,7 +245,6 @@ if ( document.documentElement.currentStyle ) {
 
 		// IE 8 and below return the specified value
 		// try to convert using a prop that will return pixels
-		// this will be accurate for most properties
 		if ( rnumnonpx.test( ret ) ) {
 			ret = awesomeHack( elem, name, ret );
 		}
@@ -261,20 +275,35 @@ curCSS = getComputedStyle || currentStyle;
 function positionPercentHack( elem, name, value ) {
 	// Left and right require measuring the innerWidth of the *offset* parent.
 	// Top and bottom require measuring the innerHeight of the *offset* parent.
-	var parent = jQuery( elem ).offsetParent(),
-		doc = elem.ownerDocument; // document
-
-	// When the offset parent is the body, we need to measure the window
+	var children, height,
+		parent = jQuery( elem ).offsetParent(),
+		doc = elem.ownerDocument, // document
+		vertical = rvpos.test( name );
+	
+	// top and bottom require offset parent to have a height (unless offset parent is body)
 	if ( parent[ 0 ] === doc.body ) {
+		// When the offset parent is the body, we need to measure the window, not body
 		parent = jQuery( doc.defaultView || doc.parentWindow );
+	} else if ( vertical && document.documentElement.currentStyle && parent[ 0 ].currentStyle.height === "auto" ) {
+		// IE 8 and below will report a height of auto
+		return "0px";
+	} else if ( vertical ) {
+		// WebKit and modern browsers won't tell you if hieght is auto
+		// Height will be zero when height is auto and the element has no children
+		children = parent.children();
+		children.detach();
+		height = parent.css( "height" );
+		parent.append( children );
+		if ( height === "0px" || height === "auto" ) {
+			return "0px";
+		}
 	}
 
 	// use simple math to calculate
-	return parseFloat( value ) / 100 * parent[ "inner" + ( rvpos.test( name ) ? "Height" : "Width" ) ]() + "px";
+	return Math.round( parseFloat( value ) / 100 * parent[ "inner" + ( vertical ? "Height" : "Width" ) ]() ) + "px";
 }
 
 function getWidthOrHeight( elem, name, extra ) {
-
 	// Start with offset property
 	var val = name === "width" ? elem.offsetWidth : elem.offsetHeight,
 		i = name === "width" ? 1 : 0,
