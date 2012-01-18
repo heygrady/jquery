@@ -195,6 +195,8 @@ if ( document.defaultView && document.defaultView.getComputedStyle ) {
 				ret = positionPercentHack( elem, name, ret );
 			} else {
 				// Fixes margin and text-indent (and others?)
+				// Fixes padding on inline elements
+				// TODO: min-height and max-height get caught here
 				ret = awesomeHack( elem, "width", ret );
 			}
 		} else if ( percentRet && !force ) {
@@ -203,7 +205,7 @@ if ( document.defaultView && document.defaultView.getComputedStyle ) {
 			if ( position === "static" && positionProp ) {
 				// IE9 returns percentages on inline static elements
 				// Firefox returns percentages for top, bottom, left, right if position is static
-				ret = "auto";
+				ret = "0px";
 			} else if ( position === "relative" && display === "inline" && positionProp ) {
 				// IE9 returns percentages on inline relative elements
 				// Fixes top, right, bottom and left
@@ -226,11 +228,20 @@ if ( document.defaultView && document.defaultView.getComputedStyle ) {
 	awesomeHack = function( elem, name, value ) {
 		var ret,
 			style = elem.style,
-			uncomputed = style[ name ];
+			uncomputed = style[ name ],
+			display = style.display,
+			inline = curCSS( elem, "display" ) === "inline";
 		
+		// width is used for converting values but it can't e applied to inline elements
+		if ( inline ) {
+			style.display = 'inline-block';
+		}
 		style[ name ] = value;
 		ret = style[ name ] ? curCSS( elem, name, 1 ) : "auto";
 		style[ name ] = uncomputed;
+		if ( inline ) {
+			style.display = display;
+		}
 		return ret;
 	};
 }
