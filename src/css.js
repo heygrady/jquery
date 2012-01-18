@@ -220,7 +220,6 @@ if ( document.defaultView && document.defaultView.getComputedStyle ) {
 
 		// TODO: IE9 and Firefox returns pixels for top, right, bottom and left instead of "auto" when position is static
 		// TODO: In all IE top/bottom is usually incorrect when offsetParent does not have an explicit height
-		// TODO: should "auto" or "0px" be returned? Firefox and Chrome usually disagree.
 		return ret;
 	};
 	
@@ -232,9 +231,9 @@ if ( document.defaultView && document.defaultView.getComputedStyle ) {
 			display = style.display,
 			inline = curCSS( elem, "display" ) === "inline";
 		
-		// width is used for converting values but it can't e applied to inline elements
+		// width is used for converting values but it can't be applied to inline elements
 		if ( inline ) {
-			style.display = 'inline-block';
+			style.display = "inline-block";
 		}
 		style[ name ] = value;
 		ret = style[ name ] ? curCSS( elem, name, 1 ) : "auto";
@@ -255,23 +254,20 @@ if ( document.documentElement.currentStyle ) {
 		// if pixel worked, then we need to add a "px" unit
 		ret = pixel ? ret + "px" : ret;
 		
-		// IE8/7/6
-		//	- left|top return pixels instead of auto if position is static
-		//	- position absolute|fixed elements return zero for percentages when height is not defined
-		//		- top, margin, padding, height, textIndent
-		//		- incorrect width
-
-		// In IE, the pixelTop|Bottom|Left|Right is unreliable when the exact parent is not positioned
+		// The pixelTop/Bottom/Left/Right are unreliable when the exact parent is not positioned
 		if ( rpos.test( name ) && !pixel && rnumperc.test( ret ) ) {
 			ret = positionPercentHack( elem, name, ret );
 		}
 
-		// IE 8 and below return the specified value
+		// currentStyle returns the specified value
 		// try to convert using a prop that will return pixels
 		if ( rnumnonpx.test( ret ) ) {
 			ret = awesomeHack( elem, name, ret );
 		}
 
+		// TODO: Returns pixels for top, right, bottom and left instead of "auto" when position is static
+		// TODO: Returns pixels for top and bottom instead of "auto" when offsetParent has height of auto
+		// TODO: In all IE top/bottom is usually incorrect when offsetParent does not have an explicit height
 		return ret === "" ? "auto" : ret;
 	};
 
@@ -313,7 +309,7 @@ function positionPercentHack( elem, name, value ) {
 	} else if ( vertical ) {
 		// getComputedStyle won't tell you if hieght is auto
 		// Height will be zero when height is auto and the element has no children
-		children = parent.wrapInner('<div />').children().hide();
+		children = parent.wrapInner( "<div />" ).children().hide();
 		height = parent.css( "height" );
 		children.find( ":first-child" ).unwrap();
 		if ( height === "0px" || height === "auto" ) {
