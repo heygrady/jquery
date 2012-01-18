@@ -170,9 +170,8 @@ jQuery.extend({
 jQuery.curCSS = jQuery.css;
 
 if ( document.defaultView && document.defaultView.getComputedStyle ) {
-	getComputedStyle = function( elem, name, extra, force ) {
-		extra = extra || name;
-		var ret, defaultView, computedStyle,
+	getComputedStyle = function( elem, name, force ) {
+		var ret, position, display, positionProp, percentRet, defaultView, computedStyle,
 			doc = elem.ownerDocument;
 
 		name = name.replace( rupper, "-$1" ).toLowerCase();
@@ -186,27 +185,40 @@ if ( document.defaultView && document.defaultView.getComputedStyle ) {
 			}
 		}
 
-		// WebKit uses "computed value" instead of "used value" for some properties
-		// which is against the CSSOM draft spec: http://dev.w3.org/csswg/cssom/#resolved-values
-		if ( !jQuery.support.usedValue && computedStyle && rnumperc.test(ret) && !force ) {
-			if ( rpos.test( extra ) ) {
+		positionProp = rpos.test( name );
+		percentRet = rnumperc.test( ret );
+		if ( !jQuery.support.usedValue && computedStyle && percentRet && !force ) {
+			// WebKit uses "computed value" instead of "used value" for some properties
+			// which is against the CSSOM draft spec: http://dev.w3.org/csswg/cssom/#resolved-values
+			if ( positionProp ) {
 				// Fixes top, right, bottom and left
-				ret = positionPercentHack(elem, extra, ret);
+				ret = positionPercentHack( elem, name, ret );
 			} else {
 				// Fixes margin and text-indent (and others?)
-				ret = awesomeHack(elem, "width", ret);
+				ret = awesomeHack( elem, "width", ret );
+			}
+		} else if ( percentRet && !force ) {
+			position = computedStyle.getPropertyValue( "position" );
+			display = computedStyle.getPropertyValue( "display" );
+			if ( position === "static" && positionProp ) {
+				// IE9 returns percentages on inline static elements
+				// Firefox returns percentages for top, bottom, left, right if position is static
+				ret = "auto";
+			} else if ( position === "relative" && display === "inline" && positionProp ) {
+				// IE9 returns percentages on inline relative elements
+				// Fixes top, right, bottom and left
+				ret = positionPercentHack( elem, name, ret );
+			} else if ( !positionProp ) {
+				// IE9 returns percentages on inline static/relative elements
+				// IE9 returns percentages on text-indent always
+				// Fixes margin, padding and text-indent (and others?)
+				ret = awesomeHack( elem, "width", ret );
 			}
 		}
 
-		// IE9
-		//	- Percentages returned on inline static|relative elements
-		//		- top, left, margin, padding, textIndent
-		//	- Percentage returned for textIndent always
-		//	- left|top return pixels instead of auto if position is static
-		// Firefox
-		//	- left|top return percentages if position is static
-		//	- left|top return pixels instead of auto if position is static
-
+		// TODO: IE9 and Firefox returns pixels for top, right, bottom and left instead of "auto" when position is static
+		// TODO: In all IE top/bottom is usually incorrect when offsetParent does not have an explicit height
+		// TODO: should "auto" or "0px" be returned? Firefox and Chrome usually disagree.
 		return ret;
 	};
 	
@@ -217,7 +229,7 @@ if ( document.defaultView && document.defaultView.getComputedStyle ) {
 			uncomputed = style[ name ];
 		
 		style[ name ] = value;
-		ret = style[ name ] ? curCSS( elem, name, name, 1 ) : "auto";
+		ret = style[ name ] ? curCSS( elem, name, 1 ) : "auto";
 		style[ name ] = uncomputed;
 		return ret;
 	};
@@ -253,7 +265,7 @@ if ( document.documentElement.currentStyle ) {
 	};
 
 	// Faster than: http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
-	// http://jsperf.com/testing-awesome-hack-for-ie
+	// http://jsperf.com/testing-awesome-hack-for-ie/3
 	awesomeHack = function( elem, name, value ) {
 		var ret,
 			style = elem.style,
@@ -262,7 +274,7 @@ if ( document.documentElement.currentStyle ) {
 		try {
 			style.left = name === "fontSize" ? "1em" : value;
 			ret = style.pixelLeft + "px";
-		} catch(e) { ret = ""; }
+		} catch( e ) { ret = ""; }
 
 		style.left = left;
 		return ret === "" ? "auto" : ret;
@@ -275,7 +287,7 @@ curCSS = getComputedStyle || currentStyle;
 function positionPercentHack( elem, name, value ) {
 	// Left and right require measuring the innerWidth of the *offset* parent.
 	// Top and bottom require measuring the innerHeight of the *offset* parent.
-	var children, height,
+	var children, height, ret,
 		parent = jQuery( elem ).offsetParent(),
 		doc = elem.ownerDocument, // document
 		vertical = rvpos.test( name );
@@ -284,23 +296,23 @@ function positionPercentHack( elem, name, value ) {
 	if ( parent[ 0 ] === doc.body ) {
 		// When the offset parent is the body, we need to measure the window, not body
 		parent = jQuery( doc.defaultView || doc.parentWindow );
-	} else if ( vertical && document.documentElement.currentStyle && parent[ 0 ].currentStyle.height === "auto" ) {
+	} else if ( vertical && currentStyle && currentStyle( parent[ 0 ], "height" ) === "auto" ) {
 		// IE 8 and below will report a height of auto
-		return "0px";
+		ret = "0px";
 	} else if ( vertical ) {
-		// WebKit and modern browsers won't tell you if hieght is auto
+		// getComputedStyle won't tell you if hieght is auto
 		// Height will be zero when height is auto and the element has no children
-		children = parent.children();
-		children.detach();
+		children = parent.wrapInner('<div />').children().hide();
 		height = parent.css( "height" );
-		parent.append( children );
+		children.find( ":first-child" ).unwrap();
 		if ( height === "0px" || height === "auto" ) {
-			return "0px";
+			ret = "0px";
 		}
 	}
 
 	// use simple math to calculate
-	return Math.round( parseFloat( value ) / 100 * parent[ "inner" + ( vertical ? "Height" : "Width" ) ]() ) + "px";
+	// TODO: is innerHeight needed or will regular height suffice?
+	return ret || Math.round( parseFloat( value ) / 100 * parent[ "inner" + ( vertical ? "Height" : "Width" ) ]() ) + "px";
 }
 
 function getWidthOrHeight( elem, name, extra ) {
