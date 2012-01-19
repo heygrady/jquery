@@ -7,8 +7,8 @@ var ralpha = /alpha\([^)]*\)/i,
 	rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)([a-z]+|%)$/i,
 	rnumperc = /^-?(?:\d*\.)?\d+%$/i,
 	rrelNum = /^([\-+])=([\-+.\de]+)/,
-	rvpos = /^top|bottom$/,
-	rpos = /^left|right|top|bottom$/,
+	rvpos = /^(top|bottom)$/,
+	rpos = /^(left|right|top|bottom)$/,
 
 	cssShow = { position: "absolute", visibility: "hidden", display: "block" },
 
