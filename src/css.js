@@ -294,7 +294,7 @@ curCSS = getComputedStyle || currentStyle;
 function positionPercentHack( elem, name, value ) {
 	// Left and right require measuring the innerWidth of the *offset* parent.
 	// Top and bottom require measuring the innerHeight of the *offset* parent.
-	var children, height, ret,
+	var hasChildren, inner, height, ret,
 		parent = jQuery( elem ).offsetParent(),
 		doc = elem.ownerDocument, // document
 		vertical = rvpos.test( name );
@@ -309,9 +309,10 @@ function positionPercentHack( elem, name, value ) {
 	} else if ( vertical ) {
 		// getComputedStyle won't tell you if hieght is auto
 		// Height will be zero when height is auto and the element has no children
-		children = parent.wrapInner( "<div />" ).children().hide();
+		hasChildren = parent[ 0 ].hasChildNodes();
+		if ( hasChildren ) { inner = parent.wrapInner( "<div />" ).children().hide()[ 0 ].firstChild; }
 		height = parent.css( "height" );
-		children.find( ":first-child" ).unwrap();
+		if ( hasChildren ) { jQuery( inner[ 0 ] ).unwrap(); }
 		if ( height === "0px" || height === "auto" ) {
 			ret = "0px";
 		}
