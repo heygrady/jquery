@@ -312,7 +312,7 @@ function positionPercentHack( elem, name, value ) {
 		hasChildren = parent[ 0 ].hasChildNodes();
 		if ( hasChildren ) { inner = parent.wrapInner( "<div />" ).children().hide()[ 0 ].firstChild; }
 		height = parent.css( "height" );
-		if ( hasChildren ) { jQuery( inner[ 0 ] ).unwrap(); }
+		if ( hasChildren ) { jQuery( inner ).unwrap(); }
 		if ( height === "0px" || height === "auto" ) {
 			ret = "0px";
 		}
